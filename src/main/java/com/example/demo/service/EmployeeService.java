@@ -1,9 +1,8 @@
-package com.example.demo.Service;
+package com.example.demo.service;
 
 
 import com.example.demo.pojo.Employee;
 import com.example.demo.pojo.EmployeeList;
-import com.example.demo.pojo.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

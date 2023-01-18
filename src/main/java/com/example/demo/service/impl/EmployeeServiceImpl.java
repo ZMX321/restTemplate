@@ -1,17 +1,18 @@
-package com.example.demo.Service.impl;
+package com.example.demo.service.impl;
 
-import com.example.demo.Service.EmployeeService;
+import com.example.demo.service.EmployeeService;
 import com.example.demo.pojo.Employee;
 import com.example.demo.pojo.EmployeeList;
-import com.example.demo.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import sun.awt.image.ImageWatched;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -19,8 +20,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private RestTemplate restTemplate;
 
-
-    private static final String baseUrl = "https://dummy.restapiexample.com/api/v1/employees";
+    @Value("${user.rest.url}")
+    private String baseUrl;
 
     @Autowired
     public EmployeeServiceImpl(RestTemplate restTemplate){
@@ -30,7 +31,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public List<EmployeeList> getEmpInAscByAge() {
         EmployeeList el = restTemplate.getForObject(baseUrl, EmployeeList.class);
-        TreeMap<Integer,List<Employee>> tMap = processEmpList(el);
+        Map<Integer,List<Employee>> tMap = processEmpList(el);
         List<EmployeeList> res = new LinkedList<>();
 
         for(Integer age : tMap.keySet()){
@@ -44,7 +45,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<Employee> getEmpGreaterAge(String requireAge) {
         Integer ra = Integer.parseInt(requireAge);
         EmployeeList el = restTemplate.getForObject(baseUrl, EmployeeList.class);
-        TreeMap<Integer,List<Employee>> tMap = processEmpList(el);
+        Map<Integer,List<Employee>> tMap = processEmpList(el);
         List<Employee> res = new LinkedList<>();
 
         for(Integer age : tMap.keySet()){
@@ -60,16 +61,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
 
-    public TreeMap<Integer, List<Employee>> processEmpList(EmployeeList list){
-        TreeMap<Integer, List<Employee>> tMap = new TreeMap<>();
-        List<Employee> le = list.getList();
+    public Map<Integer, List<Employee>> processEmpList(EmployeeList list){
 
-        for(Employee e : le){
-            if(!tMap.containsKey(e.getEmployee_age())){
-                tMap.put(e.getEmployee_age(), new LinkedList<>());
-            }
-            tMap.get(e.getEmployee_age()).add(e);
-        }
+        Map<Integer, List<Employee>> tMap = list.getList().stream().collect(Collectors.groupingBy(Employee::getEmployee_age));
 
         return tMap;
     }
